@@ -10,6 +10,7 @@ import android.util.Log;
 
 import com.gnetop.ltgamecommon.impl.OnLoginSuccessListener;
 import com.gnetop.ltgamecommon.login.LoginBackManager;
+import com.gnetop.ltgamecommon.util.DeviceIDUtil;
 import com.tencent.connect.common.Constants;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
@@ -37,7 +38,7 @@ public class QQLoginManager {
      * @param LTAppKey  乐推appKey
      * @param mListener 接口回调
      */
-    public static void qqLogin(Context context, String APP_ID,  String LTAppID,
+    public static void qqLogin(Context context, String APP_ID, String LTAppID,
                                String LTAppKey, OnLoginSuccessListener mListener) {
         Tencent mTencent = Tencent.createInstance(APP_ID, context);
         boolean isValid = mTencent.checkSessionValid(APP_ID);
@@ -87,11 +88,18 @@ public class QQLoginManager {
                             mTencent.setAccessToken(token, expires);
                             mTencent.setOpenId(openId);
                             Log.e("Tencent", "登录成功" + token + "===" + openId);
-                            Map<String,Object>map=new WeakHashMap<>();
-                            map.put("access_token",token);
-                            map.put("open_id",openId);
+                            Map<String, Object> map = new WeakHashMap<>();
+                            if (TextUtils.isEmpty(DeviceIDUtil.getUniqueId(context))) {
+                                map.put("access_token", token);
+                                map.put("open_id", openId);
+                                map.put("adid", "");
+                            } else {
+                                map.put("access_token", token);
+                                map.put("open_id", openId);
+                                map.put("adid", DeviceIDUtil.getUniqueId(context));
+                            }
                             //登录
-                            LoginBackManager.qqLogin(context, LTAppID, LTAppKey,map
+                            LoginBackManager.qqLogin(context, LTAppID, LTAppKey, map
                                     , mListener);
                         }
                     } catch (Exception e) {
